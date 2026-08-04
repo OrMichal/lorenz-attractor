@@ -1,2 +1,2 @@
-# lorenz-attractor
+# Lorenz Attractor
 Visualization of Lorenz attractor in C
