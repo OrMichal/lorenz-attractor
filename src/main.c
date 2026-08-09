@@ -6,13 +6,14 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_timer.h>
 #include <SDL3/SDL_video.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "./commands/help/help.h"
 
 #define WIDTH 800
 #define HEIGHT 600
 #define SCALE 8.0f
-#define FPS 60
 
 uint32_t framebuffer[WIDTH * HEIGHT];
 
@@ -24,9 +25,17 @@ void setPixel(uint32_t x, uint32_t y, uint32_t color) {
   framebuffer[x + y * WIDTH] = color;
 }
 
+void checkArg(int argIndex, int argc, char** argv) {
+  if(argIndex > argc) {
+    fprintf(stderr, "Invalid use of argument: '%s'!", argv[argIndex]);
+  }
+}
+
 int main(int argc, char** argv) {
   uint8_t isRunning = 1;
   SDL_Event event;
+
+  int fps = 60;
 
   float x = 0.01f;
   float y = 0.01f;
@@ -36,9 +45,28 @@ int main(int argc, char** argv) {
   float ro = 28;
   float beta = 8.0/3.0;
 
-  float target = 1.0f / FPS;
+  for(int i = 0; i < argc; i++) {
+    if(strcmp(argv[i], "--rho") == 0 || strcmp(argv[i], "-r") == 0) {
+      ro = atof(argv[i + 1]);
+      checkArg(i, argc, argv);
+    } else if(strcmp(argv[i], "--beta") == 0 || strcmp(argv[i], "-b") == 0) {
+      beta = atof(argv[i + 1]);
+      checkArg(i, argc, argv);
+    } else if(strcmp(argv[i], "--sigma") == 0 || strcmp(argv[i], "-s") == 0) {
+      sigma = atof(argv[i + 1]);
+      checkArg(i, argc, argv);
+    } else if(strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
+      return execHelpCommand();
+    } else if(strcmp(argv[i], "--fps") == 0 || strcmp(argv[i], "-f") == 0) {
+      fps = atoi(argv[i + 1]);
+      checkArg(i, argc, argv);
+    }
+  }
 
-  printf("(x, y, z): (%f, %f, %f)\n", x, y,z);
+  printf("argc: %d\n", argc);
+  printf("beta: %f, sigma: %f, rho: %f\n", beta, sigma, ro);
+
+  float target = 1.0f / fps;
 
   if(!SDL_Init(SDL_INIT_VIDEO)) {
     fprintf(stderr, "Failed to initialize application: %s \n", SDL_GetError());
